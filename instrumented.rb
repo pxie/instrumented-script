@@ -1,7 +1,5 @@
 #!/usr/bin/env ruby
-# A script that will pretend to resize a number of images
 require 'optparse'
-require "ruby-debug"
 
 SIMPLECOV_STR = "gem 'simplecov'\n"
 
@@ -78,7 +76,6 @@ def instrument(vcap_src_home)
     add_simplecov_start(vcap_src_home, comp)
   end
 
-  breakpoint
   services = %w(redis mysql mongodb rabbit neo4j memcached)
   services.each do |service|
     path = File.join(vcap_src_home, "services", service)
@@ -88,12 +85,18 @@ def instrument(vcap_src_home)
 end
 
 def reset(vcap_src_home)
+
   Dir.chdir(vcap_src_home)
-  exec("git reset --hard")
+  exec("git reset --hard") if fork == nil
+  Process.wait
+
   Dir.chdir(File.join(vcap_src_home, "services"))
-  exec("git reset --hard")
+  exec("git reset --hard") if fork == nil
+  Process.wait
+
   Dir.chdir(File.join(vcap_src_home, "uaa"))
-  exec("git reset --hard")
+  exec("git reset --hard") if fork == nil
+  Process.wait
 end
 
 
@@ -145,15 +148,10 @@ unless File.directory?(vcap_src_home)
 end
 
 if options[:insert]
-  breakpoint
   puts "start instrumenting"
   instrument(vcap_src_home)
 elsif options[:reset]
-  breakpoint
   puts "start resetting"
-  instrument(vcap_src_home)
+  reset(vcap_src_home)
 end
-puts "Being verbose" if options[:verbose]
-puts "Being quick" if options[:quick]
-puts "Logging to file #{options[:logfile]}" if options[:logfile]
-
+puts "end game"
