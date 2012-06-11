@@ -2,6 +2,7 @@
 # A script that will pretend to resize a number of images
 require 'optparse'
 require "ruby-debug"
+
 SIMPLECOV_STR = "gem 'simplecov'\n"
 
 def save_gemfile(file_handler, data)
@@ -89,11 +90,10 @@ end
 def reset(vcap_src_home)
   Dir.chdir(vcap_src_home)
   exec("git reset --hard")
-  `git reset --hard`
-  `cd services`
-  `git reset --hard`
-  `cd ../uaa`
-  `git reset --hard`
+  Dir.chdir(File.join(vcap_src_home, "services"))
+  exec("git reset --hard")
+  Dir.chdir(File.join(vcap_src_home, "uaa"))
+  exec("git reset --hard")
 end
 
 
