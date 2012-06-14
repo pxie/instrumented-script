@@ -52,6 +52,16 @@ def do_insert_simplecov_start(comp, vcap_src_home, start_script)
   file.close
 end
 
+def grace_exit(vcap_src_home)
+  stop_script = open(File.join(vcap_src_home, 'dev_setup/bin/vcap'), "r+")
+  target_str = "# Return status if we succeeded in stopping"
+  code_block = "    sleep(1) if running?\n"
+  data = stop_script.readlines
+  data.insert(data.index {|x| x =~ /#{target_str}/}, code_block)
+  stop_script.write(data.join(""))
+  stop_script.close
+end
+
 def add_simplecov_start(vcap_src_home, component)
 
   case component
@@ -87,6 +97,9 @@ def instrument(vcap_src_home)
     install_simplecov(path)
     add_simplecov_start(vcap_src_home, service)
   end
+
+  grace_exit(vcap_src_home)
+
 end
 
 def reset(vcap_src_home)
