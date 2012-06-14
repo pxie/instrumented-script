@@ -31,14 +31,19 @@ def install_simplecov(path)
   end
 end
 
-def do_insert_simplecov_start(vcap_src_home, start_script)
+def do_insert_simplecov_start(comp, vcap_src_home, start_script)
   unless File.exist?(start_script)
     raise RuntimeError, "Cannot find start script: #{start_script}"
   end
 
   process = File.basename(start_script)
-  code_block = "require 'simplecov'\nSimpleCov.start do\n  root '#{vcap_src_home}'\n" +
-    "  command_name '#{process}'\n  merge_timeout 3600\nend\n"
+  if comp == 'cloud_controller'
+    code_block = "require 'simplecov'\nSimpleCov.start 'rails' do\n  root '#{vcap_src_home}'\n" +
+      "  command_name '#{process}'\n  merge_timeout 3600\nend\n"
+  else
+    code_block = "require 'simplecov'\nSimpleCov.start do\n  root '#{vcap_src_home}'\n" +
+        "  command_name '#{process}'\n  merge_timeout 3600\nend\n"
+  end
   file = open(start_script, "r+")
   data = file.readlines
   data.insert(1, code_block)
@@ -52,16 +57,16 @@ def add_simplecov_start(vcap_src_home, component)
   case component
     when 'cloud_controller'
       start_script = File.join(vcap_src_home, "bin/#{component}")
-      do_insert_simplecov_start(vcap_src_home, start_script)
+      do_insert_simplecov_start(component, vcap_src_home, start_script)
     when 'router', 'health_manager', 'dea', 'uaa'
       start_script = File.join(vcap_src_home, "#{component}/bin/#{component}")
-      do_insert_simplecov_start(vcap_src_home, start_script)
+      do_insert_simplecov_start(component, vcap_src_home, start_script)
     when 'redis', 'mysql', 'mongodb', 'rabbit', 'neo4j', 'memcached'
       start_script = File.join(vcap_src_home, "services/#{component}/bin/#{component}_node")
-      do_insert_simplecov_start(vcap_src_home, start_script)
+      do_insert_simplecov_start(component, vcap_src_home, start_script)
 
       start_script = File.join(vcap_src_home, "services/#{component}/bin/#{component}_gateway")
-      do_insert_simplecov_start(vcap_src_home, start_script)
+      do_insert_simplecov_start(component, vcap_src_home, start_script)
     else
       raise RuntimeError, "component: #{component} is not supported"
   end
