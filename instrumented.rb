@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 require 'optparse'
+require 'fileutils'
 
 SIMPLECOV_STR = "gem 'simplecov'\n"
 
@@ -83,9 +84,20 @@ def add_simplecov_start(vcap_src_home, component)
   end
 end
 
-def instrument(vcap_src_home)
-  core_components = %w(cloud_controller router health_manager dea uaa)
+def modify_cc_start(vcap_src_home)
+  start_script = File.join(vcap_src_home, "bin/cloud_controller")
+  dest_script = "#{start_script}.rb"
+  FileUtils.cp(start_script, dest_script)
+  code_block = "$:.unshift(File.dirname(__FILE__))\nrequire 'cloud_controller'\n"
+  open(start_script, "w") do |f|
+    f.write(code_block)
+  end
 
+end
+def instrument(vcap_src_home)
+  modify_cc_start(vcap_src_home)
+
+  core_components = %w(cloud_controller router health_manager dea uaa)
   core_components.each do |comp|
     path = File.join(vcap_src_home, comp)
     install_simplecov(path)
@@ -98,9 +110,7 @@ def instrument(vcap_src_home)
     install_simplecov(path)
     add_simplecov_start(vcap_src_home, service)
   end
-
   grace_exit(vcap_src_home)
-
 end
 
 def reset(vcap_src_home)
