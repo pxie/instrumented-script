@@ -56,7 +56,7 @@ end
 def grace_exit(vcap_src_home)
   stop_script = open(File.join(vcap_src_home, 'dev_setup/bin/vcap'), "r+")
   target_str = "# Return status if we succeeded in stopping"
-  code_block = "    sleep(1) if running?\n"
+  code_block = "    while running?\n      sleep(1)\n    end\n"
   data = stop_script.readlines
   stop_script.rewind
   data.insert(data.index {|x| x =~ /#{target_str}/}, code_block)
