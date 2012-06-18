@@ -88,7 +88,7 @@ def modify_cc_start(vcap_src_home)
   start_script = File.join(vcap_src_home, "bin/cloud_controller")
   dest_script = "#{start_script}.rb"
   FileUtils.cp(start_script, dest_script)
-  code_block = "$:.unshift(File.dirname(__FILE__))\nrequire 'cloud_controller'\n"
+  code_block = "#!/usr/bin/env ruby\n$:.unshift(File.dirname(__FILE__))\nrequire 'cloud_controller'\n"
   open(start_script, "w") do |f|
     f.write(code_block)
   end
