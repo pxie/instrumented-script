@@ -2,7 +2,7 @@
 require 'optparse'
 require 'fileutils'
 
-SIMPLECOV_STR = "gem 'simplecov'\n"
+SIMPLECOV_STR = "gem 'simplecov'\ngem 'simplecov-rcov'\n"
 
 def save_gemfile(file_handler, data)
   # insert gem "simplecov" at second line
@@ -27,7 +27,7 @@ def install_simplecov(path)
     data.select! {|line| !(line =~ /simplecov/)}
     save_gemfile(gemfile, data)
     Dir.chdir(path)
-    exec("bundle update simplecov") if fork == nil
+    exec("bundle update simplecov simplecov-rcov") if fork == nil
     Process.wait
   end
 end
@@ -39,10 +39,14 @@ def do_insert_simplecov_start(comp, vcap_src_home, start_script)
 
   process = File.basename(start_script)
   if comp == 'cloud_controller'
-    code_block = "require 'simplecov'\nSimpleCov.start 'rails' do\n  root '#{vcap_src_home}'\n" +
-      "  command_name '#{process}'\n  merge_timeout 3600\nend\n"
+    code_block = "require 'simplecov'\nrequire 'simplecov-rcov'\n" +
+        "SimpleCov.formatter = SimpleCov::Formatter::RcovFormatter\n" +
+        "SimpleCov.start 'rails' do\n  root '#{vcap_src_home}'\n" +
+        "  command_name '#{process}'\n  merge_timeout 3600\nend\n"
   else
-    code_block = "require 'simplecov'\nSimpleCov.start do\n  root '#{vcap_src_home}'\n" +
+    code_block = "require 'simplecov'\nrequire 'simplecov-rcov'\n" +
+        "SimpleCov.formatter = SimpleCov::Formatter::RcovFormatter\n" +
+        "SimpleCov.start do\n  root '#{vcap_src_home}'\n" +
         "  command_name '#{process}'\n  merge_timeout 3600\nend\n"
   end
   file = open(start_script, "r+")
@@ -114,7 +118,6 @@ def instrument(vcap_src_home)
 end
 
 def reset(vcap_src_home)
-
   Dir.chdir(vcap_src_home)
   exec("git reset --hard") if fork == nil
   Process.wait
@@ -126,6 +129,8 @@ def reset(vcap_src_home)
   Dir.chdir(File.join(vcap_src_home, "uaa"))
   exec("git reset --hard") if fork == nil
   Process.wait
+
+  FileUtils.remove_dir(File.join(vcap_src_home, "coverage"))
 end
 
 
@@ -139,12 +144,6 @@ optparse = OptionParser.new do|opts|
   # Set a banner, displayed at the top
   # of the help screen.
   opts.banner = "Usage: instrumented.rb [options] VCAP_SRC_HOME"
-
-  # Define the options, and what they do
-  options[:verbose] = false
-  opts.on( '-v', '--verbose', 'Output more information' ) do
-    options[:verbose] = true
-  end
 
   options[:insert] = false
   opts.on( '-i', '--insert', 'Insert simplecov code into dev_setup source' ) do
