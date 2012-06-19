@@ -77,10 +77,13 @@ def add_simplecov_start(vcap_src_home, component)
     when 'router', 'health_manager', 'dea', 'uaa'
       start_script = File.join(vcap_src_home, "#{component}/bin/#{component}")
       do_insert_simplecov_start(component, vcap_src_home, start_script)
-    when 'redis', 'mysql', 'mongodb', 'rabbit', 'neo4j', 'memcached'
+    when 'redis', 'mysql', 'mongodb', 'rabbit', 'neo4j', 'memcached', 'postgresql', 'vblob'
       start_script = File.join(vcap_src_home, "services/#{component}/bin/#{component}_node")
       do_insert_simplecov_start(component, vcap_src_home, start_script)
 
+      start_script = File.join(vcap_src_home, "services/#{component}/bin/#{component}_gateway")
+      do_insert_simplecov_start(component, vcap_src_home, start_script)
+    when 'filesystem'
       start_script = File.join(vcap_src_home, "services/#{component}/bin/#{component}_gateway")
       do_insert_simplecov_start(component, vcap_src_home, start_script)
     else
@@ -108,7 +111,7 @@ def instrument(vcap_src_home)
     add_simplecov_start(vcap_src_home, comp)
   end
 
-  services = %w(redis mysql mongodb rabbit neo4j memcached)
+  services = %w(redis mysql mongodb rabbit neo4j memcached filesystem vblob postgresql)
   services.each do |service|
     path = File.join(vcap_src_home, "services", service)
     install_simplecov(path)
