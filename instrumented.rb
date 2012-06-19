@@ -2,11 +2,11 @@
 require 'optparse'
 require 'fileutils'
 
-SIMPLECOV_STR = "gem 'simplecov'\ngem 'simplecov-rcov'\n"
-
 def save_gemfile(file_handler, data)
   # insert gem "simplecov" at second line
-  data.insert(1, SIMPLECOV_STR)
+
+  simplecov_str = "gem 'simplecov'\ngem 'simplecov-rcov'\n"
+  data.insert(1, simplecov_str)
   file_handler.rewind
   file_handler.write(data.join(""))
   file_handler.close
@@ -38,14 +38,19 @@ def do_insert_simplecov_start(comp, vcap_src_home, start_script)
   end
 
   process = File.basename(start_script)
+  if $simplecov_format
+    rcov_str = nil
+  else
+    rcov_str = "SimpleCov.formatter = SimpleCov::Formatter::RcovFormatter\n"
+  end
   if comp == 'cloud_controller'
     code_block = "require 'simplecov'\nrequire 'simplecov-rcov'\n" +
-        "SimpleCov.formatter = SimpleCov::Formatter::RcovFormatter\n" +
+        "#{rcov_str}" +
         "SimpleCov.start 'rails' do\n  root '#{vcap_src_home}'\n" +
         "  command_name '#{process}'\n  merge_timeout 3600\nend\n"
   else
     code_block = "require 'simplecov'\nrequire 'simplecov-rcov'\n" +
-        "SimpleCov.formatter = SimpleCov::Formatter::RcovFormatter\n" +
+        "#{rcov_str}" +
         "SimpleCov.start do\n  root '#{vcap_src_home}'\n" +
         "  command_name '#{process}'\n  merge_timeout 3600\nend\n"
   end
@@ -153,6 +158,12 @@ optparse = OptionParser.new do|opts|
     options[:insert] = true
   end
 
+  options[:simplecov_format] = false
+  opts.on( '--simplecov-format', "Use simplecov report format, default is rcov report format. " +
+      "This option only works for -i, --insert" ) do
+    options[:simplecov_format] = true
+  end
+
   options[:reset] = false
   opts.on( '-r', '--reset', 'reset dev_setup source code back to normal' ) do
     options[:reset] = true
@@ -180,6 +191,7 @@ end
 
 if options[:insert]
   puts "start instrumenting"
+  $simplecov_format = options[:simplecov_format]
   instrument(vcap_src_home)
 elsif options[:reset]
   puts "start resetting"
