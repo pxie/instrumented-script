@@ -41,15 +41,15 @@ def do_insert_simplecov_start(comp, vcap_src_home, start_script)
   if $simplecov_format
     rcov_str = nil
   else
-    rcov_str = "SimpleCov.formatter = SimpleCov::Formatter::RcovFormatter\n"
+    rcov_str = "require 'simplecov-rcov'\nSimpleCov.formatter = SimpleCov::Formatter::RcovFormatter\n"
   end
   if comp == 'cloud_controller'
-    code_block = "require 'simplecov'\nrequire 'simplecov-rcov'\n" +
+    code_block = "require 'simplecov'\n" +
         "#{rcov_str}" +
         "SimpleCov.start 'rails' do\n  root '#{vcap_src_home}'\n" +
         "  command_name '#{process}'\n  merge_timeout 3600\nend\n"
   else
-    code_block = "require 'simplecov'\nrequire 'simplecov-rcov'\n" +
+    code_block = "require 'simplecov'\n" +
         "#{rcov_str}" +
         "SimpleCov.start do\n  root '#{vcap_src_home}'\n" +
         "  command_name '#{process}'\n  merge_timeout 3600\nend\n"
@@ -138,7 +138,8 @@ def reset(vcap_src_home)
   exec("git reset --hard") if fork == nil
   Process.wait
 
-  FileUtils.remove_dir(File.join(vcap_src_home, "coverage"))
+  coverage_dir = File.join(vcap_src_home, "coverage")
+  FileUtils.remove_dir(coverage_dir) if Dir.exist?(coverage_dir)
 end
 
 
