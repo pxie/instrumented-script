@@ -63,7 +63,7 @@ def do_insert_simplecov_start(comp, vcap_src_home, start_script)
 end
 
 def grace_exit(vcap_src_home)
-  stop_script = open(File.join(vcap_src_home, 'dev_setup/bin/vcap'), "r+")
+  stop_script = open(File.join(vcap_src_home, 'dev_setup/lib/vcap_components.rb'), "r+")
   target_str = "# Return status if we succeeded in stopping"
   code_block = "    while running?\n      sleep(1)\n    end\n"
   data = stop_script.readlines
@@ -110,7 +110,7 @@ end
 def instrument(vcap_src_home)
   modify_cc_start(vcap_src_home)
 
-  core_components = %w(cloud_controller router health_manager dea uaa)
+  core_components = %w(cloud_controller router health_manager dea)
   core_components.each do |comp|
     path = File.join(vcap_src_home, '..', comp)
     case comp
