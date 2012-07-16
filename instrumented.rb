@@ -137,7 +137,7 @@ def reset(vcap_src_home)
   exec("git reset --hard") if fork == nil
   Process.wait
 
-  Dir.chdir(File.join(vcap_src_home, '../cloudcontroller'))
+  Dir.chdir(File.join(vcap_src_home, '../cloud_controller'))
   exec("git reset --hard") if fork == nil
   Process.wait
 
