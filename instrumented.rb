@@ -98,7 +98,7 @@ def add_simplecov_start(vcap_src_home, component)
 end
 
 def modify_cc_start(vcap_src_home)
-  start_script = File.join(vcap_src_home, "bin/cloud_controller")
+  start_script = File.join(vcap_src_home, "../cloud_controller/cloud_controller/bin/cloud_controller")
   dest_script = "#{start_script}.rb"
   FileUtils.cp(start_script, dest_script)
   code_block = "#!/usr/bin/env ruby\n$:.unshift(File.dirname(__FILE__))\nrequire 'cloud_controller'\n"
