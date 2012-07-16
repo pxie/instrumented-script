@@ -123,7 +123,7 @@ def instrument(vcap_src_home)
   end
 
   services = %w(redis mysql mongodb rabbit neo4j memcached filesystem vblob postgresql echo
-                  elasticsearch couchdb serialization_data_server)
+                  elasticsearch couchdb)
   services.each do |service|
     path = File.join(vcap_src_home, "services", service)
     install_simplecov(path)
