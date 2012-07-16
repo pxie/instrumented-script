@@ -123,7 +123,7 @@ def instrument(vcap_src_home)
   end
 
   services = %w(redis mysql mongodb rabbit neo4j memcached filesystem vblob postgresql echo
-                  elasticsearch couchdb service_broker serialization_data_server)
+                  elasticsearch couchdb serialization_data_server)
   services.each do |service|
     path = File.join(vcap_src_home, "services", service)
     install_simplecov(path)
@@ -134,6 +134,18 @@ end
 
 def reset(vcap_src_home)
   Dir.chdir(vcap_src_home)
+  exec("git reset --hard") if fork == nil
+  Process.wait
+
+  Dir.chdir(File.join(vcap_src_home, '../cloudcontroller'))
+  exec("git reset --hard") if fork == nil
+  Process.wait
+
+  Dir.chdir(File.join(vcap_src_home, '../dea'))
+  exec("git reset --hard") if fork == nil
+  Process.wait
+
+  Dir.chdir(File.join(vcap_src_home, '../router'))
   exec("git reset --hard") if fork == nil
   Process.wait
 
