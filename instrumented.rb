@@ -112,8 +112,13 @@ def instrument(vcap_src_home)
 
   core_components = %w(cloud_controller router health_manager dea uaa)
   core_components.each do |comp|
-    path = File.join(vcap_src_home, comp)
-    install_simplecov(path)
+    path = File.join(vcap_src_home, '..', comp)
+    case comp
+      when 'cloud_controller', 'health_manager'
+        install_simplecov(File.join(vcap_src_home, '../cloud_controller', comp))
+      when 'router', 'dea'
+        install_simplecov(File.join(vcap_src_home, '..', comp))
+    end
     add_simplecov_start(vcap_src_home, comp)
   end
 
