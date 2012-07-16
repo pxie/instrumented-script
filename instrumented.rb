@@ -76,11 +76,11 @@ end
 def add_simplecov_start(vcap_src_home, component)
 
   case component
-    when 'cloud_controller'
-      start_script = File.join(vcap_src_home, "bin/#{component}")
+    when 'cloud_controller', 'health_manager'
+      start_script = File.join(vcap_src_home, "../cloud_controller/#{component}/bin/#{component}")
       do_insert_simplecov_start(component, vcap_src_home, start_script)
-    when 'router', 'health_manager', 'dea', 'uaa'
-      start_script = File.join(vcap_src_home, "#{component}/bin/#{component}")
+    when 'router', 'dea', 'uaa'
+      start_script = File.join(vcap_src_home, "../#{component}/bin/#{component}")
       do_insert_simplecov_start(component, vcap_src_home, start_script)
     when 'redis', 'mysql', 'mongodb', 'rabbit', 'neo4j', 'memcached', 'postgresql', 'vblob',
           'echo', 'elasticsearch', 'couchdb'
