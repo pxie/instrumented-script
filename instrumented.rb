@@ -47,12 +47,12 @@ def do_insert_simplecov_start(comp, vcap_src_home, start_script)
   if comp == 'cloud_controller'
     code_block = "require 'simplecov'\n" +
         "#{rcov_str}" +
-        "SimpleCov.start 'rails' do\n  root '#{code_coverage_root}'\n" +
+        "SimpleCov.start 'rails' do\n  root '#{code_coverage_root}'\n  add_filter '.deployments/'\n" +
         "  command_name '#{process}'\n  merge_timeout 3600\nend\n"
   else
     code_block = "require 'simplecov'\n" +
         "#{rcov_str}" +
-        "SimpleCov.start do\n  root '#{code_coverage_root}'\n" +
+        "SimpleCov.start do\n  root '#{code_coverage_root}'\n  add_filter '.deployments/'\n" +
         "  command_name '#{process}'\n  merge_timeout 3600\nend\n"
   end
   file = open(start_script, "r+")
@@ -106,8 +106,8 @@ def modify_cc_start(vcap_src_home)
   open(start_script, "w") do |f|
     f.write(code_block)
   end
-
 end
+
 def instrument(vcap_src_home)
   modify_cc_start(vcap_src_home)
 
@@ -161,8 +161,6 @@ def reset(vcap_src_home)
   coverage_dir = File.join(vcap_src_home, "coverage")
   FileUtils.remove_dir(coverage_dir) if Dir.exist?(coverage_dir)
 end
-
-
 
 # This hash will hold all of the options
 # parsed from the command-line by
